@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <div class="sidebar">
       <h2>SasaDoc</h2>
-      <button class="new-chat-btn">+ New Chat</button>
+      <button class="new-chat-btn" @click="startNewChat">+ New Chat</button>
       <ul class="chat-list">
         <li v-for="(chat, index) in chatHistory" :key="index" @click="loadChat(index)">
           Chat {{ index + 1 }}
@@ -47,12 +47,13 @@ export default {
       this.messages.push({ text: "SasaDoc is thinking...", sender: "bot" });
 
       try {
-        const response = await axios.post("/chat", {
-          message: this.userMessage,
-        });
+        const response = await axios.post("/chat", { message: this.userMessage });
 
         this.messages.pop();
-        this.messages.push({ text: response.data.reply, sender: "bot" });
+        this.messages.push({ text: response.data.reply.join("").trim(), sender: "bot" });
+
+        // Save chat history
+        this.chatHistory.push([...this.messages]);
 
       } catch (error) {
         this.messages.pop();
@@ -63,6 +64,9 @@ export default {
     },
     loadChat(index) {
       this.messages = this.chatHistory[index];
+    },
+    startNewChat() {
+      this.messages = [{ text: "Hello! How can I assist you today?", sender: "bot" }];
     }
   }
 };
