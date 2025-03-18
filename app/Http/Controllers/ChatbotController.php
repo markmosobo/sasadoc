@@ -27,7 +27,7 @@ class ChatbotController extends Controller
                     'Content-Type'  => 'application/json',
                 ],
                 'json' => [
-                    'version' => 'meta/meta-llama-3-8b-instruct',
+                    'version' => 'meta/meta-llama-3-70b-instruct',
                     'input'   => ['prompt' => $userMessage],
                 ],
             ]);
