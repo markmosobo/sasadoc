@@ -12,27 +12,27 @@ use App\Models\User;
 class ChatbotController extends Controller
 {
 
-     // User Registration
-     public function register(Request $request)
-     {
-         $request->validate([
-             'first_name' => 'required|string|max:255',
-             'last_name' => 'required|string|max:255',
-             'email' => 'required|string|email|max:255|unique:users',
-             'password' => 'required|string|min:6|confirmed',
-         ]);
- 
-         $user = User::create([
-             'first_name' => $request->first_name,
-             'last_name' => $request->last_name,
-             'email' => $request->email,
-             'password' => Hash::make($request->password),
-         ]);
- 
-         $token = $user->createToken('auth_token')->plainTextToken;
- 
-         return response()->json(['message' => 'User registered successfully', 'token' => $token], 201);
-     }
+    public function register(Request $request)
+    {
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+    
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+    
+        // Ensure Sanctum is installed and the HasApiTokens trait is used in User model
+        $token = $user->createToken('auth_token')->plainTextToken;
+    
+        return response()->json(['message' => 'User registered successfully', 'token' => $token], 201);
+    }
  
      // User Login
      public function login(Request $request)

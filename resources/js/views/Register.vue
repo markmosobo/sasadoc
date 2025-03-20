@@ -10,7 +10,7 @@
           <input v-model="confirmPassword" type="password" placeholder="Confirm Password" required />
           <button type="submit">Sign Up</button>
         </form>
-        <p>Already have an account? <router-link to="/login">Login</router-link></p>
+        <p>Already have an account? <router-link to="/">Login</router-link></p>
       </div>
     </div>
   </template>
@@ -45,7 +45,6 @@
   
         try {
           const response = await axios.post("/api/register", userData);
-          alert(response.data.message || "Registration successful!");
           console.log("User registered successfully:", response.data);
           this.$router.push("/");
   
