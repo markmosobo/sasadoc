@@ -25,7 +25,7 @@ class ChatbotController extends Controller
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => bcrypt($request->password), // ✅ Always hash passwords
         ]);
     
         // Ensure Sanctum is installed and the HasApiTokens trait is used in User model
@@ -34,32 +34,63 @@ class ChatbotController extends Controller
         return response()->json(['message' => 'User registered successfully', 'token' => $token], 201);
     }
  
-     // User Login
-     public function login(Request $request)
-     {
-         $request->validate([
-             'email' => 'required|email',
-             'password' => 'required',
-         ]);
- 
-         if (!Auth::attempt($request->only('email', 'password'))) {
-             return response()->json(['error' => 'Invalid credentials'], 401);
-         }
- 
-         $user = Auth::user();
-         $token = $user->createToken('auth_token')->plainTextToken;
- 
-         return response()->json(['message' => 'Login successful', 'token' => $token], 200);
-     }
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        // Debug: Check user before authentication
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['error' => 'Invalid credentials or password mismatch'], 401);
+        }
+
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json(['message' => 'Login successful', 'token' => $token], 200);
+    }
+
 
       // Logout Function
+    // public function logout(Request $request)
+    // {
+    //     // Revoke the user's token
+    //     $request->user()->tokens()->delete();
+
+    //     return response()->json(['message' => 'Successfully logged out']);
+    // }
     public function logout(Request $request)
     {
-        // Revoke the user's token
-        $request->user()->tokens()->delete();
-
+        $user = $request->user();
+    
+        if (!$user) {
+            Log::error('Logout failed: User not authenticated.');
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+    
+        // Debugging: Log the user's ID
+        Log::info('Logging out user: ' . $user->id);
+    
+        // Check if user has tokens
+        if ($user->tokens->isEmpty()) {
+            Log::warning('Logout attempt: No active tokens found.');
+            return response()->json(['message' => 'No active session found'], 400);
+        }
+    
+        // Delete all tokens
+        $user->tokens()->delete();
+    
         return response()->json(['message' => 'Successfully logged out']);
     }
+    
 
     public function chat(Request $request)
     {

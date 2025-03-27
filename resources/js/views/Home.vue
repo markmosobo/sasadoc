@@ -55,7 +55,7 @@
         this.messages.push({ text: "SasaDoc is thinking...", sender: "bot" });
   
         try {
-          const response = await axios.post("/chat", { message: this.userMessage });
+          const response = await axios.post("/api/chat", { message: this.userMessage });
   
           this.messages.pop();
           this.messages.push({ text: response.data.reply.join("").trim(), sender: "bot" });
@@ -82,6 +82,7 @@
                 }
             })
             .then(response => {
+                console.log(response.data);
                 alert(response.data.message);
                 localStorage.removeItem("token"); // Clear token
                 this.$router.push("/login"); // Redirect to login
